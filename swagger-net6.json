@@ -1,0 +1,620 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "AWS GW ICE API",
+    "description": "# Changes\r\n[Click here to view the changes from previous release](http://dfx-swagger.s3-website-us-east-1.amazonaws.com/?apiKey=iceapi&environment=test&onlineSwaggerUrl=http://localhost:5000%2Fswagger%2Fv1/swagger.json&currentRelease=&apiName=ICE%20API \"Show Changes\")\r\n# Introduction\r\nIce API is the main backend endpoint for the ICE Gateway API and will provide all the required data from existing DFX systems. The API uses OAuth2 for all the methods (credentials will be provided separately for each application). Some of the API methods required scope information like the set of dealers Id to execute on or the current DFX user Id to run the query on behalf. These scope values expected to be provide in a request header named \"Scope\". The Scope header can contain an array or one JSON object with one or more of the following properties:\r\n  - Environment – Should contains one of the values \"Prod1\", \"Prod2\", or \"Pilot1\"\r\n  - DealerId – DFX dealer Id number\r\n  - Vin – Vehicle VIN.\r\n  - CustomerId – DFX customer Id\r\n  - DealerProgramId – DFX unique number for customer, vehicle and dealer.\r\n  - CultureCode – standard culture code (en-US, en-CA, fr-CA, es-MX).\r\n  - DfxUserId – Dealer-FX user Id.\r\n  - IceUserId - Ice user Id.\r\n  - OemName - Name of the OEM.\r\n  - DealerCode - OEMs dealer code\r\nEach method will have information about which Scope information it supports/requires.\r\n\r\n# Error handling\r\nIn case of internal exception the result response code will be 500 and the response body will contain a Json object will the following properties:\r\n  - Message - the exception message\r\n  - ExceptionTimestamp - an integer timestamp that will help to find that exception in the DFX log system. The application should allow the end user to see this code and direct him to call the support center with that number.\r\n  - Exception - optional - the full exception description and stacktrace. This property will be include only on Dev/Test environments.",
+    "version": "aws",
+    "x-logo": {
+      "url": "https://www.dealer-fx.com/wp-content/uploads/2017/03/logo4.png"
+    }
+  },
+  "paths": {
+    "/advisors": {
+      "get": {
+        "tags": [
+          "Advisors"
+        ],
+        "summary": "Get list of Advisor - ICE-245",
+        "produces": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "appointmentType",
+            "description": "Appointment Type for e.g. pitstop, service"
+          },
+          {
+            "in": "query",
+            "name": "FetchWithDMSID",
+            "description": "Optional param to fetch DMSIDs for advisors in the dealership",
+            "type": "boolean",
+            "default": false
+          },
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "$ref": "#/definitions/GetAdvisorsResponse"
+            },
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "type": "string"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "type": "string"
+              }
+            }
+          },
+          "500": {
+            "description": "Server Error",
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "type": "string"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "IceApiService": [ ]
+          }
+        ],
+        "x-amazon-apigateway-integration": {
+          "responses": {
+            "500": {
+              "statusCode": "500",
+              "responseParameters": {
+                "method.response.header.Access-Control-Allow-Origin": "'*'"
+              }
+            },
+            "401": {
+              "statusCode": "401",
+              "responseParameters": {
+                "method.response.header.Access-Control-Allow-Origin": "'*'"
+              }
+            },
+            "400": {
+              "statusCode": "400",
+              "responseParameters": {
+                "method.response.header.Access-Control-Allow-Origin": "'*'"
+              }
+            },
+            "default": {
+              "statusCode": "200",
+              "responseParameters": {
+                "method.response.header.Access-Control-Allow-Origin": "'*'"
+              }
+            }
+          },
+          "requestParameters": {
+            "integration.request.querystring.appointmentType": "method.request.querystring.appointmentType",
+            "integration.request.querystring.FetchWithDMSID": "method.request.querystring.FetchWithDMSID",
+            "integration.request.header.User-Agent": "context.identity.userAgent",
+            "integration.request.header.Authorization": "method.request.header.Authorization"
+          },
+          "uri": "https://${stageVariables.url}#{ICEAPI_SUB_ENVIRONMENT}#.dealer-fx.com",
+          "passthroughBehavior": "when_no_match",
+          "httpMethod": "GET",
+          "type": "http"
+        }
+      },
+      "options": {
+        "responses": {
+          "200": {
+            "description": "200 response",
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "type": "string"
+              },
+              "Access-Control-Allow-Methods": {
+                "type": "string"
+              },
+              "Access-Control-Allow-Headers": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "x-schema": {
+          "Ref": "#/definitions/Empty"
+        },
+        "x-amazon-apigateway-integration": {
+          "responses": {
+            "default": {
+              "statusCode": "200",
+              "responseParameters": {
+                "method.response.header.Access-Control-Allow-Methods": "'Get'",
+                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Authorization'",
+                "method.response.header.Access-Control-Allow-Origin": "'*'"
+              }
+            }
+          },
+          "requestTemplates": {
+            "application/json": "{\"statusCode\": 200}"
+          },
+          "passthroughBehavior": "when_no_match",
+          "type": "mock"
+        }
+      }
+    },
+    "/hc": {
+      "get": {
+        "tags": [
+          "HealthCheck"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "fromLB",
+            "type": "boolean"
+          },
+          {
+            "in": "header",
+            "name": "Authorization",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "type": "string"
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "x-amazon-apigateway-integration": {
+          "responses": {
+            "500": {
+              "statusCode": "500",
+              "responseParameters": {
+                "method.response.header.Access-Control-Allow-Origin": "'*'"
+              }
+            },
+            "default": {
+              "statusCode": "200",
+              "responseParameters": {
+                "method.response.header.Access-Control-Allow-Origin": "'*'"
+              }
+            }
+          },
+          "requestParameters": {
+            "integration.request.querystring.fromLB": "method.request.querystring.fromLB",
+            "integration.request.header.User-Agent": "context.identity.userAgent",
+            "integration.request.header.Authorization": "method.request.header.Authorization"
+          },
+          "uri": "https://${stageVariables.url}#{ICEAPI_SUB_ENVIRONMENT}#.dealer-fx.com",
+          "passthroughBehavior": "when_no_match",
+          "httpMethod": "GET",
+          "type": "http"
+        }
+      },
+      "options": {
+        "responses": {
+          "200": {
+            "description": "200 response",
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "type": "string"
+              },
+              "Access-Control-Allow-Methods": {
+                "type": "string"
+              },
+              "Access-Control-Allow-Headers": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "x-schema": {
+          "Ref": "#/definitions/Empty"
+        },
+        "x-amazon-apigateway-integration": {
+          "responses": {
+            "default": {
+              "statusCode": "200",
+              "responseParameters": {
+                "method.response.header.Access-Control-Allow-Methods": "'Get'",
+                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Authorization'",
+                "method.response.header.Access-Control-Allow-Origin": "'*'"
+              }
+            }
+          },
+          "requestTemplates": {
+            "application/json": "{\"statusCode\": 200}"
+          },
+          "passthroughBehavior": "when_no_match",
+          "type": "mock"
+        }
+      }
+    },
+    "/oauth/token": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "200 response",
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "type": "string"
+              }
+            }
+          },
+          "400": {
+            "description": "400 response"
+          },
+          "500": {
+            "description": "500 response"
+          }
+        },
+        "x-procedure": "application/json",
+        "x-amazon-apigateway-integration": {
+          "responses": {
+            "400": {
+              "statusCode": "400"
+            },
+            "500": {
+              "statusCode": "500"
+            },
+            "default": {
+              "statusCode": "500",
+              "responseParameters": {
+                "method.response.header.Access-Control-Allow-Origin": "'*'"
+              }
+            }
+          },
+          "uri": "#{TOKEN_PROVIDER_ARN}#",
+          "passthroughBehavior": "when_no_match",
+          "httpMethod": "POST",
+          "type": "aws_proxy"
+        }
+      },
+      "options": {
+        "responses": {
+          "200": {
+            "description": "200 response",
+            "headers": {
+              "Access-Control-Allow-Origin": {
+                "type": "string"
+              },
+              "Access-Control-Allow-Methods": {
+                "type": "string"
+              },
+              "Access-Control-Allow-Headers": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "x-schema": {
+          "Ref": "#/definitions/Empty"
+        },
+        "x-amazon-apigateway-integration": {
+          "responses": {
+            "default": {
+              "statusCode": "200",
+              "responseParameters": {
+                "method.response.header.Access-Control-Allow-Methods": "'Post'",
+                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Authorization'",
+                "method.response.header.Access-Control-Allow-Origin": "'*'"
+              }
+            }
+          },
+          "requestTemplates": {
+            "application/json": "{\"statusCode\": 200}"
+          },
+          "passthroughBehavior": "when_no_match",
+          "type": "mock"
+        }
+      }
+    },
+    "/mitsu/{proxy+}": {
+      "x-amazon-apigateway-any-method": {
+        "parameters": [
+          {
+            "name": "proxy",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "x-amazon-apigateway-integration": {
+          "uri": "https://${stageVariables.url}#{ICEAPI_SUB_ENVIRONMENT}#.dealer-fx.com/mitsu/{proxy}",
+          "requestParameters": {
+            "integration.request.path.proxy": "method.request.path.proxy"
+          },
+          "passthroughBehavior": "when_no_match",
+          "httpMethod": "ANY",
+          "type": "http_proxy"
+        }
+      }
+    },
+    "/doc": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "200 response",
+            "headers": {
+              "content-type": {
+                "type": "strinf"
+              }
+            }
+          }
+        }
+      },
+      "x-amazon-apigateway-integration": {
+        "uri": "https://${stageVariables.url}#{ICEAPI_SUB_ENVIRONMENT}#.dealer-fx.com/doc",
+        "responses": {
+          "DefaultResponse": {
+            "statusCode": "200",
+            "responseParameters": {
+              "ParameterHeaderContentType": "'text/html'"
+            }
+          }
+        },
+        "passthroughBehavior": "when_no_match",
+        "httpMethod": "GET",
+        "type": "http"
+      }
+    },
+    "/swagger/{proxy+}": {
+      "x-amazon-apigateway-any-method": {
+        "parameters": [
+          {
+            "name": "proxy",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "x-amazon-apigateway-integration": {
+          "uri": "https://${stageVariables.url}#{ICEAPI_SUB_ENVIRONMENT}#.dealer-fx.com/swagger/{proxy}",
+          "responses": {
+            "default": {
+              "statusCode": "200"
+            }
+          },
+          "requestParameters": {
+            "integration.request.path.proxy": "method.request.path.proxy"
+          },
+          "passthroughBehavior": "when_no_match",
+          "httpMethod": "ANY",
+          "type": "http_proxy"
+        }
+      }
+    }
+  },
+  "definitions": {
+    "AppointmentTypeEnum": {
+      "format": "int32",
+      "enum": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "type": "integer"
+    },
+    "Empty": {
+      "title": "Empty Schema",
+      "type": "object"
+    },
+    "GetAdvisorsResponse": {
+      "type": "object",
+      "properties": {
+        "advisors": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ServiceAdvisorModel"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "ServiceAdvisorModel": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "format": "int32",
+          "type": "integer"
+        },
+        "memberId": {
+          "format": "int32",
+          "type": "integer"
+        },
+        "name": {
+          "type": "string"
+        },
+        "photoUrl": {
+          "type": "string"
+        },
+        "dmsid": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "securityDefinitions": {
+    "IceApiService": {
+      "type": "apiKey",
+      "name": "Authorization",
+      "in": "header",
+      "dfx-policy": [
+        "GET/advisors"
+      ],
+      "x-amazon-apigateway-authtype": "custom",
+      "x-amazon-apigateway-authorizer": {
+        "authorizerUri": "#{AUTHORIZE_HANDLER_ARN}#:IceApiService/invocations",
+        "authorizerResultTtlInSeconds": "600",
+        "identitySource": "method.request.header.Authorization",
+        "type": "request"
+      }
+    }
+  },
+  "x-amazon-apigateway-documentation": {
+    "Version": 1,
+    "CreatedDate": "2023-05-03T18:56:39.9544923Z",
+    "documentationParts": [
+      {
+        "Location": {
+          "Type": "API"
+        },
+        "Properties": {
+          "Info": {
+            "Logo": {
+              "Url": "https://www.dealer-fx.com/wp-content/uploads/2017/03/logo4.png"
+            }
+          }
+        }
+      },
+      {
+        "Location": {
+          "Type": "METHOD",
+          "Path": "/advisors",
+          "Method": "GET"
+        },
+        "Properties": {
+          "Summary": "Get list of Advisor - ICE-245",
+          "Description": null
+        }
+      },
+      {
+        "Location": {
+          "Type": "QUERY_PARAMETER",
+          "Name": "appointmentType"
+        },
+        "Properties": {
+          "Description": null
+        }
+      },
+      {
+        "Location": {
+          "Type": "QUERY_PARAMETER",
+          "Name": "FetchWithDMSID"
+        },
+        "Properties": {
+          "Description": null
+        }
+      },
+      {
+        "Location": {
+          "Type": "RESPONSE",
+          "Path": "/advisors",
+          "Method": "GET",
+          "StatusCode": "200"
+        },
+        "Properties": {
+          "Description": "Success"
+        }
+      },
+      {
+        "Location": {
+          "Type": "RESPONSE",
+          "Path": "/advisors",
+          "Method": "GET",
+          "StatusCode": "400"
+        },
+        "Properties": {
+          "Description": "Bad Request"
+        }
+      },
+      {
+        "Location": {
+          "Type": "RESPONSE",
+          "Path": "/advisors",
+          "Method": "GET",
+          "StatusCode": "500"
+        },
+        "Properties": {
+          "Description": "Server Error"
+        }
+      },
+      {
+        "Location": {
+          "Type": "RESPONSE",
+          "Path": "/advisors",
+          "Method": "GET",
+          "StatusCode": "401"
+        },
+        "Properties": {
+          "Description": "Unauthorized"
+        }
+      },
+      {
+        "Location": {
+          "Type": "METHOD",
+          "Path": "/hc",
+          "Method": "GET"
+        },
+        "Properties": {
+          "Summary": null,
+          "Description": null
+        }
+      },
+      {
+        "Location": {
+          "Type": "QUERY_PARAMETER",
+          "Name": "fromLB"
+        },
+        "Properties": {
+          "Description": null
+        }
+      },
+      {
+        "Location": {
+          "Type": "RESPONSE",
+          "Path": "/hc",
+          "Method": "GET",
+          "StatusCode": "200"
+        },
+        "Properties": {
+          "Description": "Success"
+        }
+      },
+      {
+        "Location": {
+          "Type": "RESPONSE",
+          "Path": "/hc",
+          "Method": "GET",
+          "StatusCode": "500"
+        },
+        "Properties": {
+          "Description": "Internal Server Error"
+        }
+      }
+    ]
+  }
+}
